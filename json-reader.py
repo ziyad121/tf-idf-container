@@ -4,10 +4,11 @@ Created on Tue Oct 29 11:00:30 2019
 
 @author: meftahzd
 """
-import pandas as pd 
 import json
+import pandas as pd 
 import re
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 with open("publication.json") as f:
     data = json.load(f)["_source"]
@@ -30,27 +31,21 @@ def pre_process(text):
     return text
 
  
-t['text'] = t.fillna('').apply(lambda row: row['title'] + row['abstract']+ str(' , '.join(str(v) for v in row["topic"])), axis=1)
+t['text'] = t.fillna('').apply(lambda row: row['title'] +' '+str(row['abstract'])+ str(' '.join(str(v) for v in row["topic"])), axis=1)
 t['text'] = t['text'].apply(lambda x:pre_process(x))
 
 
-def get_stop_words(file_path):
-    """load stop words """
-    
-    with open(file_path, 'r', encoding="utf-8") as f:
-        stopwords = f.readlines()
-        stop_set = set(m.strip() for m in stopwords)
-        return frozenset(stop_set)
-    
+count_vectorizer = TfidfVectorizer(stop_words='english')
+count_vectorizer = TfidfVectorizer()
 
-#load a set of stop words
-stopwords=get_stop_words("stopwords.txt")
- 
-#get the text column 
-docs=t['text'].tolist() 
- 
-#create a vocabulary of words, 
-#ignore words that appear in 85% of documents, 
-#eliminate stop words
-cv=CountVectorizer(max_df=0.85,stop_words=stopwords)
-word_count_vector=cv.fit_transform(docs)
+sparse_matrix = count_vectorizer.fit_transform(t['text'].values.tolist())
+doc_term_matrix = sparse_matrix.todense()
+
+df = pd.DataFrame(doc_term_matrix, columns=count_vectorizer.get_feature_names())
+
+output = pd.DataFrame(data=cosine_similarity(df, df), index= t.index, columns=t.index)
+
+
+def getsimilarityjson(id):
+    A = output[id].sort_values(ascending=False)
+    return({"target_items":id,"similar_items":A.drop(A.index[0]).to_dict()})
