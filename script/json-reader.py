@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Oct 29 11:00:30 2019
-
+Created on Tue Oct 26 11:00:30 2019
 @author: meftahzd
 """
 import json
@@ -9,8 +8,6 @@ import pandas as pd
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
-doc_id = sys.argv[1]
 
 with open("publication.json") as f:
     data = json.load(f)["_source"]
