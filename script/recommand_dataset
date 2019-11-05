@@ -45,6 +45,3 @@ df = pd.DataFrame(doc_term_matrix, columns=count_vectorizer.get_feature_names())
 output = pd.DataFrame(data=cosine_similarity(df, df), index= t.index, columns=t.index)
 
 
-def getsimilarityjson(id):
-    A = output[id].sort_values(ascending=False)
-    return({"target_items":id,"similar_items":A.drop(A.index[0]).to_dict()})
