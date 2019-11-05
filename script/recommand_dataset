@@ -1,20 +1,16 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Oct 26 11:00:30 2019
-@author: meftahzd
-"""
 import json
 import pandas as pd 
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-with open("publication.json") as f:
-    data = json.load(f)["_source"]
+with open("/data/json/publication.json") as f :
+    d = json.load(f)
     
-df=pd.DataFrame(data).T
+s=pd.DataFrame(d).T
 
-t=df.loc[:,["abstract","id", "title", "topic"]]
+t=s.loc[:,["abstract","id", "title", "topic"]]
+
 
 def pre_process(text):
     
@@ -30,9 +26,8 @@ def pre_process(text):
     return text
 
  
-t['text'] = t.fillna('').apply(lambda row: row['title'] +' '+str(row['abstract'])+ str(' '.join(str(v) for v in row["topic"])), axis=1)
+t['text'] = t.fillna('').apply(lambda row: row['title'] + row['abstract']+ str(' , '.join(str(v) for v in row["topic"])), axis=1)
 t['text'] = t['text'].apply(lambda x:pre_process(x))
-
 
 count_vectorizer = TfidfVectorizer(stop_words='english')
 count_vectorizer = TfidfVectorizer()
@@ -43,5 +38,10 @@ doc_term_matrix = sparse_matrix.todense()
 df = pd.DataFrame(doc_term_matrix, columns=count_vectorizer.get_feature_names())
 
 output = pd.DataFrame(data=cosine_similarity(df, df), index= t.index, columns=t.index)
+
+output.to_pickle('my_file.pkl')
+
+
+
 
 
