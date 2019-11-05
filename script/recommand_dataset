@@ -1,0 +1,19 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Nov  5 10:28:36 2019
+
+@author: meftahzd
+"""
+import pandas as pd 
+import sys 
+import json
+
+def getsimilarityjson(id):
+    out = pd.read_pickle('my_file.pkl')
+    A = out[id].sort_values(ascending=False)
+    return(json.dumps({"target_items":id,"similar_items":A.drop(A.index[0]).to_dict()}))
+
+doc_id = sys.argv[1]
+sim = getsimilarityjson(doc_id)
+print(sim)
+
